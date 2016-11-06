@@ -6,14 +6,14 @@ static Window *s_main_window;
 static Window *s_window;
 static MenuLayer *s_menu_layer;
 static TextLayer *details_layer;
-static TextLayer *add_new_layer;
 
 typedef struct {
   char str[256];
 } Data;
+static Data DataStore[6];
 
 static uint16_t menu_get_num_rows_callback(MenuLayer *menu_layer, uint16_t section_index, void *data) {
-  return NUM_MENU_ITEMS+1;
+  return sizeof(DataStore)+1;
 }
 
 static void menu_draw_row_callback(GContext* ctx, const Layer *cell_layer, MenuIndex *cell_index, void *data) {
@@ -24,9 +24,7 @@ static void menu_draw_row_callback(GContext* ctx, const Layer *cell_layer, MenuI
   }
   
   // Add row content with actual data from data source
-  char str[256];
-  snprintf(str, 256, "Item %ds content goes here", cell_index->row);
-  menu_cell_basic_draw(ctx, cell_layer, str, NULL, NULL);
+  menu_cell_basic_draw(ctx, cell_layer, DataStore[cell_index->row - 1].str, NULL, NULL);
 }
 
 static void window_load(Window *window) {
@@ -43,10 +41,13 @@ static void window_unload(Window *window){
 
 static void menu_select_callback(MenuLayer *menu_layer, MenuIndex *cell_index, void *data) {
   
-  Data *dat = malloc(sizeof(Data));
-  snprintf(dat->str, 256, "Cell Index %d", cell_index->row);
+  if(cell_index->row == 0){
+    // Create a new row with data
+    return;
+  }
+  
   s_window = window_create();
-  window_set_user_data(s_window, dat);
+  window_set_user_data(s_window, DataStore[cell_index->row].str);
   window_set_window_handlers(s_window, (WindowHandlers) {
     .load = window_load,
     .unload = window_unload,
@@ -101,6 +102,13 @@ static void main_window_unload(Window *window) {
 }
 
 static void init() {
+  // Lets create some data to populate the store
+  for (int i=0; i<6; i++){
+    snprintf(DataStore[i].str, 256, "Item %ds content goes here", i+1);
+  }
+  
+  
+  
   s_main_window = window_create();
   window_set_window_handlers(s_main_window, (WindowHandlers) {
     .load = main_window_load,
