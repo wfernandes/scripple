@@ -1,0 +1,26 @@
+{
+    "author": "wfernandes",
+    "dependencies": {},
+    "keywords": [],
+    "name": "scripple",
+    "pebble": {
+        "displayName": "Scripple",
+        "enableMultiJS": false,
+        "messageKeys": [],
+        "projectType": "native",
+        "resources": {
+            "media": []
+        },
+        "sdkVersion": "3",
+        "targetPlatforms": [
+            "aplite",
+            "basalt",
+            "chalk"
+        ],
+        "uuid": "1d6c7f01-d948-42a6-aa4e-b2084210ebbc",
+        "watchapp": {
+            "watchface": false
+        }
+    },
+    "version": "2.0.0"
+}
