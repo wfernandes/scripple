@@ -6,16 +6,24 @@ static Window *s_main_window;
 static Window *s_window;
 static MenuLayer *s_menu_layer;
 static TextLayer *details_layer;
+static TextLayer *add_new_layer;
 
 typedef struct {
   char str[256];
 } Data;
 
 static uint16_t menu_get_num_rows_callback(MenuLayer *menu_layer, uint16_t section_index, void *data) {
-  return NUM_MENU_ITEMS;
+  return NUM_MENU_ITEMS+1;
 }
 
 static void menu_draw_row_callback(GContext* ctx, const Layer *cell_layer, MenuIndex *cell_index, void *data) {
+  // Add the + sign menu item
+  if (cell_index->row == 0) {
+    menu_cell_title_draw(ctx, cell_layer, "+");
+    return;
+  }
+  
+  // Add row content with actual data from data source
   char str[256];
   snprintf(str, 256, "Item %ds content goes here", cell_index->row);
   menu_cell_basic_draw(ctx, cell_layer, str, NULL, NULL);
