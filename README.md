@@ -1,5 +1,11 @@
 # scripple
-A pebble app that scribes spontaneous thoughts
+A pebble app that scribes spontaneous thoughts.
+
+## Etymology
+/ˈskripəl/
+
+A hasty word play from scribe and pebble. In hindsight, should've just called it
+_scribble_
 
 ## Details
 This is a WatchApp for Pebble that will allow the user to add notes or thoughts
