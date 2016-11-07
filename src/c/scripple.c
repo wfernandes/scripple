@@ -71,6 +71,21 @@ static void menu_select_callback(MenuLayer *menu_layer, MenuIndex *cell_index, v
   window_stack_push(s_window, true);
 }
 
+static void menu_long_select_callback(MenuLayer *menu_layer, MenuIndex *cell_index, void *data) {
+  if (cell_index->row == 0){
+    // Don't delete the add row item
+    return;
+  }
+  printf("Delete row item: %d", cell_index->row);
+  for(int i = cell_index->row - 1; i < num_data_store - 1; i++){
+    DataStore[i] = DataStore[i+1];
+  }
+  num_data_store--;
+  // Redraw the menu layer
+  menu_layer_reload_data(menu_layer);
+}
+
+
 #ifdef PBL_ROUND 
 static int16_t get_cell_height_callback(MenuLayer *menu_layer, MenuIndex *cell_index, void *callback_context) { 
   if (menu_layer_is_index_selected(menu_layer, cell_index)) {
@@ -103,6 +118,7 @@ static void main_window_load(Window *window) {
     .get_header_height = NULL,
     .draw_row = menu_draw_row_callback,
     .select_click = menu_select_callback,
+    .select_long_click = menu_long_select_callback,
     .get_cell_height = PBL_IF_ROUND_ELSE(get_cell_height_callback, NULL),
   });
 
