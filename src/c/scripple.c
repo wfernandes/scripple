@@ -1,19 +1,29 @@
 #include "pebble.h"
 
 #define NUM_MENU_ITEMS 3
+#define DATA_STORE_SIZE 6
 
 static Window *s_main_window;
 static Window *s_window;
 static MenuLayer *s_menu_layer;
 static TextLayer *details_layer;
+static int num_data_store;
 
 typedef struct {
   char str[256];
 } Data;
-static Data DataStore[6];
+static Data DataStore[DATA_STORE_SIZE];
+
+static void add_data_store(int index){
+  // Persist to datastore if within the store limit
+  if(index >= DATA_STORE_SIZE){
+    return;
+  }
+  snprintf(DataStore[index].str, 256, "Item %ds content goes here", index);
+}
 
 static uint16_t menu_get_num_rows_callback(MenuLayer *menu_layer, uint16_t section_index, void *data) {
-  return sizeof(DataStore)+1;
+  return num_data_store+1;
 }
 
 static void menu_draw_row_callback(GContext* ctx, const Layer *cell_layer, MenuIndex *cell_index, void *data) {
@@ -43,11 +53,17 @@ static void menu_select_callback(MenuLayer *menu_layer, MenuIndex *cell_index, v
   
   if(cell_index->row == 0){
     // Create a new row with data
+    num_data_store++;
+    add_data_store(num_data_store-1);
+
+    // Redraw the layer
+    menu_layer_reload_data(menu_layer);
+    
     return;
   }
   
   s_window = window_create();
-  window_set_user_data(s_window, DataStore[cell_index->row].str);
+  window_set_user_data(s_window, DataStore[cell_index->row - 1].str);
   window_set_window_handlers(s_window, (WindowHandlers) {
     .load = window_load,
     .unload = window_unload,
@@ -103,11 +119,10 @@ static void main_window_unload(Window *window) {
 
 static void init() {
   // Lets create some data to populate the store
-  for (int i=0; i<6; i++){
-    snprintf(DataStore[i].str, 256, "Item %ds content goes here", i+1);
+  num_data_store = 3;
+  for (int i=0; i<num_data_store; i++){
+    add_data_store(i);
   }
-  
-  
   
   s_main_window = window_create();
   window_set_window_handlers(s_main_window, (WindowHandlers) {
