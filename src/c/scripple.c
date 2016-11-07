@@ -6,8 +6,9 @@
 static Window *s_main_window;
 static Window *s_window;
 static MenuLayer *s_menu_layer;
-static TextLayer *details_layer;
+static TextLayer *s_details_layer;
 static int num_data_store;
+
 
 typedef struct {
   char str[256];
@@ -40,13 +41,13 @@ static void menu_draw_row_callback(GContext* ctx, const Layer *cell_layer, MenuI
 static void window_load(Window *window) {
   Layer *window_layer = window_get_root_layer(window);
   GRect bounds = layer_get_frame(window_layer);
-  details_layer = text_layer_create(GRect(0, PBL_IF_ROUND_ELSE(80,80), bounds.size.w, bounds.size.h));
-  text_layer_set_text(details_layer, window_get_user_data(window));
-  layer_add_child(window_layer, text_layer_get_layer(details_layer));
+  s_details_layer = text_layer_create(GRect(0, PBL_IF_ROUND_ELSE(80,80), bounds.size.w, bounds.size.h));
+  text_layer_set_text(s_details_layer, window_get_user_data(window));
+  layer_add_child(window_layer, text_layer_get_layer(s_details_layer));
 }
 
 static void window_unload(Window *window){
-  text_layer_destroy(details_layer);
+  text_layer_destroy(s_details_layer);
 }
 
 static void menu_select_callback(MenuLayer *menu_layer, MenuIndex *cell_index, void *data) {
