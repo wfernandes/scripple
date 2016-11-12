@@ -43,14 +43,6 @@ static void dictation_session_callback(DictationSession *session, DictationSessi
   add_dictated_data_store();
 }
 
-static void add_data_store(int index){
-  // Persist to datastore if within the store limit
-  if(index >= DATA_STORE_SIZE){
-    return;
-  }
-  snprintf(DataStore[index].str, 256, "Item %ds content goes here", index);
-}
-
 static uint16_t menu_get_num_rows_callback(MenuLayer *menu_layer, uint16_t section_index, void *data) {
   return num_data_store+1;
 }
@@ -63,7 +55,7 @@ static void menu_draw_row_callback(GContext* ctx, const Layer *cell_layer, MenuI
   }
   
   // Add row content with actual data from data source
-  menu_cell_basic_draw(ctx, cell_layer, DataStore[cell_index->row - 1].str, "subtext", NULL);
+  menu_cell_basic_draw(ctx, cell_layer, DataStore[cell_index->row - 1].str, "", NULL);
 }
 
 static void window_load(Window *window) {
@@ -83,10 +75,7 @@ static void menu_select_callback(MenuLayer *menu_layer, MenuIndex *cell_index, v
   if(cell_index->row == 0){
     // Start the dictation session
     printf("Start Dictation Session\n");
-    //dictation_session_start(s_dictation_session);
-    // Create a new row with data
-    num_data_store++;
-    add_data_store(num_data_store-1);
+    dictation_session_start(s_dictation_session);
 
     // Redraw the layer
     menu_layer_reload_data(menu_layer);
@@ -166,12 +155,6 @@ static void main_window_unload(Window *window) {
 }
 
 static void init() {
-  // Lets create some data to populate the store
-  num_data_store = 3;
-  for (int i=0; i<num_data_store; i++){
-    add_data_store(i);
-  }
-  
   // Create new dictation session
   s_dictation_session = dictation_session_create(sizeof(s_dictated_text), dictation_session_callback, NULL);
   
