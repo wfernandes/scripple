@@ -1,31 +1,34 @@
 #include "pebble.h"
 
-#define NUM_MENU_ITEMS 3
-#define DATA_STORE_SIZE 6
+#define MAX_NUM_ITEMS 10
+#define ITEM_SIZE 256
+#define DATA_STORE_KEY 100
 
 static Window *s_main_window;
 static Window *s_window;
 static MenuLayer *s_menu_layer;
 static TextLayer *s_details_layer;
-static int num_data_store;
 static DictationSession *s_dictation_session;
-static char s_dictated_text[256];
+static char s_dictated_text[ITEM_SIZE];
 
 typedef struct {
-  char str[256];
-} Data;
-static Data DataStore[DATA_STORE_SIZE];
+  char str[ITEM_SIZE];
+} data_t;
+
+typedef struct {
+  int num_items;
+  data_t items[MAX_NUM_ITEMS];
+} data_store_t;
+
+data_store_t scripples;
 
 static void add_dictated_data_store() {
-  // Create a new row with data
-  num_data_store++;
-  int index = num_data_store - 1;
-  // Persist to datastore if within the store limit
-  if(index >= DATA_STORE_SIZE){
+  // Do not persist to datastore if greater than store limit
+  if(scripples.num_items + 1 > MAX_NUM_ITEMS){
     return;
   }
-  printf("Dictated Text: %s", s_dictated_text);
-  snprintf(DataStore[index].str, 256, s_dictated_text, index);
+  ++scripples.num_items;
+  snprintf(scripples.items[scripples.num_items - 1].str, ITEM_SIZE, "%s", s_dictated_text);
   
   // Redraw the layer
   menu_layer_reload_data(s_menu_layer);
@@ -33,29 +36,27 @@ static void add_dictated_data_store() {
 
 static void dictation_session_callback(DictationSession *session, DictationSessionStatus status,
                                      char *transcription, void *context) {
-  printf("Inside dication callback\n");
   if(status != DictationSessionStatusSuccess) {
     printf("Dictation Error: %d\n", (int)status);
     return;    
   }
-  printf("Dication Success\n");
   snprintf(s_dictated_text, sizeof(s_dictated_text), "%s", transcription);
   add_dictated_data_store();
 }
 
 static uint16_t menu_get_num_rows_callback(MenuLayer *menu_layer, uint16_t section_index, void *data) {
-  return num_data_store+1;
+  return scripples.num_items+1;
 }
 
 static void menu_draw_row_callback(GContext* ctx, const Layer *cell_layer, MenuIndex *cell_index, void *data) {
   // Add the + sign menu item
   if (cell_index->row == 0) {
-    menu_cell_title_draw(ctx, cell_layer, "+ SCRIPPLE");
+    menu_cell_title_draw(ctx, cell_layer, "+");
     return;
   }
   
   // Add row content with actual data from data source
-  menu_cell_basic_draw(ctx, cell_layer, DataStore[cell_index->row - 1].str, "", NULL);
+  menu_cell_basic_draw(ctx, cell_layer, scripples.items[cell_index->row - 1].str, "", NULL);
 }
 
 static void window_load(Window *window) {
@@ -74,17 +75,15 @@ static void menu_select_callback(MenuLayer *menu_layer, MenuIndex *cell_index, v
   
   if(cell_index->row == 0){
     // Start the dictation session
-    printf("Start Dictation Session\n");
     dictation_session_start(s_dictation_session);
 
     // Redraw the layer
     menu_layer_reload_data(menu_layer);
-    
     return;
   }
   
   s_window = window_create();
-  window_set_user_data(s_window, DataStore[cell_index->row - 1].str);
+  window_set_user_data(s_window, scripples.items[cell_index->row - 1].str);
   window_set_window_handlers(s_window, (WindowHandlers) {
     .load = window_load,
     .unload = window_unload,
@@ -97,11 +96,10 @@ static void menu_long_select_callback(MenuLayer *menu_layer, MenuIndex *cell_ind
     // Don't delete the add row item
     return;
   }
-  printf("Delete row item: %d", cell_index->row);
-  for(int i = cell_index->row - 1; i < num_data_store - 1; i++){
-    DataStore[i] = DataStore[i+1];
+  for(int i = cell_index->row - 1; i < scripples.num_items - 1; i++){
+    scripples.items[i] = scripples.items[i+1];
   }
-  num_data_store--;
+  scripples.num_items--;
   // Redraw the menu layer
   menu_layer_reload_data(menu_layer);
 }
@@ -123,10 +121,7 @@ static int16_t get_cell_height_callback(MenuLayer *menu_layer, MenuIndex *cell_i
 }
 #endif
 
-
-
 static void main_window_load(Window *window) {
-
   // Now we prepare to initialize the menu layer
   Layer *window_layer = window_get_root_layer(window);
   GRect bounds = layer_get_frame(window_layer);
@@ -147,6 +142,8 @@ static void main_window_load(Window *window) {
   menu_layer_set_click_config_onto_window(s_menu_layer, window);
 
   layer_add_child(window_layer, menu_layer_get_layer(s_menu_layer));
+  
+  menu_layer_reload_data(s_menu_layer);
 }
 
 static void main_window_unload(Window *window) {
@@ -158,6 +155,15 @@ static void init() {
   // Create new dictation session
   s_dictation_session = dictation_session_create(sizeof(s_dictated_text), dictation_session_callback, NULL);
   
+  // Load persisted data if any
+  if (persist_exists(DATA_STORE_KEY)) {
+    scripples.num_items = persist_read_int(DATA_STORE_KEY);
+    
+    for(int i=1; i<=scripples.num_items; i++){
+      persist_read_string(DATA_STORE_KEY+i, &scripples.items[i-1].str[0], sizeof(data_t));
+    }
+  } 
+  
   s_main_window = window_create();
   window_set_window_handlers(s_main_window, (WindowHandlers) {
     .load = main_window_load,
@@ -167,6 +173,10 @@ static void init() {
 }
 
 static void deinit() {
+  persist_write_int(DATA_STORE_KEY, scripples.num_items);
+  for(int i=1; i<=scripples.num_items; i++){
+    persist_write_string(DATA_STORE_KEY+i, &scripples.items[i-1].str[0]);
+  }
   dictation_session_destroy(s_dictation_session);
   window_destroy(s_main_window);
 }
