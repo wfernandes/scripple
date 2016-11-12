@@ -8,12 +8,40 @@ static Window *s_window;
 static MenuLayer *s_menu_layer;
 static TextLayer *s_details_layer;
 static int num_data_store;
-
+static DictationSession *s_dictation_session;
+static char s_dictated_text[256];
 
 typedef struct {
   char str[256];
 } Data;
 static Data DataStore[DATA_STORE_SIZE];
+
+static void add_dictated_data_store() {
+  // Create a new row with data
+  num_data_store++;
+  int index = num_data_store - 1;
+  // Persist to datastore if within the store limit
+  if(index >= DATA_STORE_SIZE){
+    return;
+  }
+  printf("Dictated Text: %s", s_dictated_text);
+  snprintf(DataStore[index].str, 256, s_dictated_text, index);
+  
+  // Redraw the layer
+  menu_layer_reload_data(s_menu_layer);
+}
+
+static void dictation_session_callback(DictationSession *session, DictationSessionStatus status,
+                                     char *transcription, void *context) {
+  printf("Inside dication callback\n");
+  if(status != DictationSessionStatusSuccess) {
+    printf("Dictation Error: %d\n", (int)status);
+    return;    
+  }
+  printf("Dication Success\n");
+  snprintf(s_dictated_text, sizeof(s_dictated_text), "%s", transcription);
+  add_dictated_data_store();
+}
 
 static void add_data_store(int index){
   // Persist to datastore if within the store limit
@@ -30,12 +58,12 @@ static uint16_t menu_get_num_rows_callback(MenuLayer *menu_layer, uint16_t secti
 static void menu_draw_row_callback(GContext* ctx, const Layer *cell_layer, MenuIndex *cell_index, void *data) {
   // Add the + sign menu item
   if (cell_index->row == 0) {
-    menu_cell_title_draw(ctx, cell_layer, "+");
+    menu_cell_title_draw(ctx, cell_layer, "+ SCRIPPLE");
     return;
   }
   
   // Add row content with actual data from data source
-  menu_cell_basic_draw(ctx, cell_layer, DataStore[cell_index->row - 1].str, NULL, NULL);
+  menu_cell_basic_draw(ctx, cell_layer, DataStore[cell_index->row - 1].str, "subtext", NULL);
 }
 
 static void window_load(Window *window) {
@@ -53,6 +81,9 @@ static void window_unload(Window *window){
 static void menu_select_callback(MenuLayer *menu_layer, MenuIndex *cell_index, void *data) {
   
   if(cell_index->row == 0){
+    // Start the dictation session
+    printf("Start Dictation Session\n");
+    //dictation_session_start(s_dictation_session);
     // Create a new row with data
     num_data_store++;
     add_data_store(num_data_store-1);
@@ -141,6 +172,9 @@ static void init() {
     add_data_store(i);
   }
   
+  // Create new dictation session
+  s_dictation_session = dictation_session_create(sizeof(s_dictated_text), dictation_session_callback, NULL);
+  
   s_main_window = window_create();
   window_set_window_handlers(s_main_window, (WindowHandlers) {
     .load = main_window_load,
@@ -150,6 +184,7 @@ static void init() {
 }
 
 static void deinit() {
+  dictation_session_destroy(s_dictation_session);
   window_destroy(s_main_window);
 }
 
