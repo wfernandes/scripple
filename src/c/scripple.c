@@ -3,6 +3,7 @@
 #define MAX_NUM_ITEMS 10
 #define ITEM_SIZE 256
 #define DATA_STORE_KEY 100
+#define STORAGE_VERSION_KEY 99
 
 static Window *s_main_window;
 static Window *s_details_window;
@@ -11,6 +12,7 @@ static TextLayer *s_details_layer;
 static StatusBarLayer *s_status_layer;
 static DictationSession *s_dictation_session;
 static char s_dictated_text[ITEM_SIZE];
+const int current_storage_version = 1;
 
 typedef struct {
   char str[ITEM_SIZE];
@@ -178,6 +180,7 @@ static void init() {
 }
 
 static void deinit() {
+  persist_write_int(STORAGE_VERSION_KEY, current_storage_version);
   persist_write_int(DATA_STORE_KEY, scripples.num_items);
   for(int i=1; i<=scripples.num_items; i++){
     persist_write_string(DATA_STORE_KEY+i, &scripples.items[i-1].str[0]);
