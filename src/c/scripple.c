@@ -8,6 +8,7 @@ static Window *s_main_window;
 static Window *s_window;
 static MenuLayer *s_menu_layer;
 static TextLayer *s_details_layer;
+static StatusBarLayer *s_status_layer;
 static DictationSession *s_dictation_session;
 static char s_dictated_text[ITEM_SIZE];
 
@@ -120,9 +121,13 @@ static int16_t get_cell_height_callback(MenuLayer *menu_layer, MenuIndex *cell_i
 #endif
 
 static void main_window_load(Window *window) {
-  // Now we prepare to initialize the menu layer
+  s_status_layer = status_bar_layer_create();
+  status_bar_layer_set_colors(s_status_layer, GColorChromeYellow, GColorBlack);
+  
   Layer *window_layer = window_get_root_layer(window);
-  GRect bounds = layer_get_frame(window_layer);
+  GRect bounds = layer_get_bounds(window_layer);
+  // To make room for the status bar
+  bounds.origin.y = STATUS_BAR_LAYER_HEIGHT;
 
   // Create the menu layer
   s_menu_layer = menu_layer_create(bounds);
@@ -139,13 +144,14 @@ static void main_window_load(Window *window) {
   // Bind the menu layer's click config provider to the window for interactivity
   menu_layer_set_click_config_onto_window(s_menu_layer, window);
 
+  layer_add_child(window_layer, status_bar_layer_get_layer(s_status_layer));
   layer_add_child(window_layer, menu_layer_get_layer(s_menu_layer));
   
   menu_layer_reload_data(s_menu_layer);
 }
 
 static void main_window_unload(Window *window) {
-  // Destroy the menu layer
+  status_bar_layer_destroy(s_status_layer);
   menu_layer_destroy(s_menu_layer);
 }
 
