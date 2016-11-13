@@ -129,7 +129,6 @@ static void main_window_load(Window *window) {
   // To make room for the status bar
   bounds.origin.y = STATUS_BAR_LAYER_HEIGHT;
 
-  // Create the menu layer
   s_menu_layer = menu_layer_create(bounds);
   menu_layer_set_callbacks(s_menu_layer, NULL, (MenuLayerCallbacks){
     .get_num_sections = NULL,
@@ -141,6 +140,7 @@ static void main_window_load(Window *window) {
     .get_cell_height = PBL_IF_ROUND_ELSE(get_cell_height_callback, NULL),
   });
 
+  menu_layer_set_highlight_colors(s_menu_layer, GColorSunsetOrange, GColorBlack);
   // Bind the menu layer's click config provider to the window for interactivity
   menu_layer_set_click_config_onto_window(s_menu_layer, window);
 
