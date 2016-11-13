@@ -2,7 +2,7 @@
 A pebble app that scribes spontaneous thoughts.
 
 ![Screen0](/res/Screenshot0.png)&nbsp;&nbsp;
-![Screen1](/res/Screenshot1.png)&nbsp;&nbsp;
+![Screen3](/res/Screenshot3.png)&nbsp;&nbsp;
 ![Screen2](/res/Screenshot2.png)
 
 ## Etymology
