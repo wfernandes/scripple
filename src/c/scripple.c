@@ -5,7 +5,7 @@
 #define DATA_STORE_KEY 100
 
 static Window *s_main_window;
-static Window *s_window;
+static Window *s_details_window;
 static MenuLayer *s_menu_layer;
 static TextLayer *s_details_layer;
 static StatusBarLayer *s_status_layer;
@@ -65,7 +65,8 @@ static void menu_draw_row_callback(GContext* ctx, const Layer *cell_layer, MenuI
 static void window_load(Window *window) {
   Layer *window_layer = window_get_root_layer(window);
   GRect bounds = layer_get_frame(window_layer);
-  s_details_layer = text_layer_create(GRect(0, PBL_IF_ROUND_ELSE(80,80), bounds.size.w, bounds.size.h));
+  s_details_layer = text_layer_create(bounds);
+  text_layer_set_font(s_details_layer, fonts_get_system_font(FONT_KEY_GOTHIC_28));
   text_layer_set_text(s_details_layer, window_get_user_data(window));
   layer_add_child(window_layer, text_layer_get_layer(s_details_layer));
 }
@@ -81,13 +82,13 @@ static void menu_select_callback(MenuLayer *menu_layer, MenuIndex *cell_index, v
     return;
   }
   
-  s_window = window_create();
-  window_set_user_data(s_window, scripples.items[cell_index->row - 1].str);
-  window_set_window_handlers(s_window, (WindowHandlers) {
+  s_details_window = window_create();
+  window_set_user_data(s_details_window, scripples.items[cell_index->row - 1].str);
+  window_set_window_handlers(s_details_window, (WindowHandlers) {
     .load = window_load,
     .unload = window_unload,
   });
-  window_stack_push(s_window, true);
+  window_stack_push(s_details_window, true);
 }
 
 static void menu_long_select_callback(MenuLayer *menu_layer, MenuIndex *cell_index, void *data) {
@@ -183,6 +184,7 @@ static void deinit() {
   }
   dictation_session_destroy(s_dictation_session);
   window_destroy(s_main_window);
+  window_destroy(s_details_window);
 }
 
 int main(void) {
