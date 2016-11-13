@@ -15,6 +15,12 @@ _scribble_
 This is a WatchApp for Pebble that will allow the user to add notes or thoughts
 directly into Pebble via the Dictation service.
 
+## Usage
+- Click the `+` to start a dictation session to input text.
+- Use the scroll buttons on the watch to move up and down.
+- Click `Select` on an item to open it up in a more detailed view.
+- Long press the `Select` button to delete an item.
+
 ## Purpose
 The reason for this project is simply for me to code some more. And I also
 happen to love my Pebble watch. I wanted to get the following from this project:
