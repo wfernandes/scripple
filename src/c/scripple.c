@@ -49,9 +49,11 @@ static uint16_t menu_get_num_rows_callback(MenuLayer *menu_layer, uint16_t secti
 }
 
 static void menu_draw_row_callback(GContext* ctx, const Layer *cell_layer, MenuIndex *cell_index, void *data) {
-  // Add the + sign menu item
   if (cell_index->row == 0) {
-    menu_cell_title_draw(ctx, cell_layer, "+");
+    // Render the '+' in the center of the cell layer
+    graphics_draw_text(ctx, "+", fonts_get_system_font(FONT_KEY_GOTHIC_28),
+                      layer_get_frame(cell_layer), GTextOverflowModeWordWrap,
+                      GTextAlignmentCenter, NULL);
     return;
   }
   
@@ -72,13 +74,9 @@ static void window_unload(Window *window){
 }
 
 static void menu_select_callback(MenuLayer *menu_layer, MenuIndex *cell_index, void *data) {
-  
   if(cell_index->row == 0){
     // Start the dictation session
     dictation_session_start(s_dictation_session);
-
-    // Redraw the layer
-    menu_layer_reload_data(menu_layer);
     return;
   }
   
