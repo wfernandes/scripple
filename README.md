@@ -1,9 +1,11 @@
 # scripple
 A pebble app that scribes spontaneous thoughts.
 
-![Screen0](/res/Screenshot0.png)&nbsp;&nbsp;
-![Screen3](/res/Screenshot3.png)&nbsp;&nbsp;
-![Screen2](/res/Screenshot2.png)
+![Icon](/assets/scripple.png)&nbsp;&nbsp;
+![Screen0](/assets/Screenshot0.png)&nbsp;&nbsp;
+![Screen3](/assets/Screenshot1.png)&nbsp;&nbsp;
+![Screen3](/assets/Screenshot2.png)&nbsp;&nbsp;
+![Screen2](/assets/Screenshot3.png)
 
 ## Etymology
 /ˈskripəl/
@@ -31,6 +33,9 @@ happen to love my Pebble watch. I wanted to get the following from this project:
 - Learn CloudPebble and how to publish a Pebble app
 - Learn how to write idiomatic C
 - Learn how to write efficient and performant C code
+
+## Icon Attribution
+Original icon made by [Vectors Market](http://www.flaticon.com/authors/vectors-market) from www.flaticon.com
 
 ## Future Ideas
 Currently I just want a simple create and delete of limited number of menu items.
