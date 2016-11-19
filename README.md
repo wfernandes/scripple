@@ -1,5 +1,5 @@
 ![Icon](/assets/scripple.png)&nbsp;&nbsp;
-# scripple
+# [scripple](https://apps.getpebble.com/en_US/application/5830b6418c7fff66e1000061)
 A pebble app that scribes spontaneous thoughts.
 
 ![Screen0](/assets/Screenshot0.png)&nbsp;&nbsp;
