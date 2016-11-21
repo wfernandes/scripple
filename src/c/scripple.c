@@ -69,6 +69,7 @@ static void window_load(Window *window) {
   GRect bounds = layer_get_frame(window_layer);
   s_details_layer = text_layer_create(bounds);
   text_layer_set_font(s_details_layer, fonts_get_system_font(FONT_KEY_GOTHIC_28));
+  text_layer_set_text_alignment(s_details_layer, GTextAlignmentCenter);
   text_layer_set_text(s_details_layer, window_get_user_data(window));
   layer_add_child(window_layer, text_layer_get_layer(s_details_layer));
   text_layer_enable_screen_text_flow_and_paging(s_details_layer, 5);
@@ -143,12 +144,6 @@ static void init() {
       persist_read_string(DATA_STORE_KEY+i, &scripples.items[i-1].str[0], sizeof(data_t));
     }
   } 
-  // Add some fake data
-  scripples.num_items = 4;
-  snprintf(scripples.items[scripples.num_items - 1].str, ITEM_SIZE, "This is a test");
-  snprintf(scripples.items[scripples.num_items - 2].str, ITEM_SIZE, "This is a another test. It is going to be a long one.");
-  snprintf(scripples.items[scripples.num_items - 3].str, ITEM_SIZE, "This is a third test");
-  snprintf(scripples.items[scripples.num_items - 4].str, ITEM_SIZE, "This is a fourth test");
   
   s_details_window = window_create();
   window_set_window_handlers(s_details_window, (WindowHandlers) {
