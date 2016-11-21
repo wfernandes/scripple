@@ -71,6 +71,7 @@ static void window_load(Window *window) {
   text_layer_set_font(s_details_layer, fonts_get_system_font(FONT_KEY_GOTHIC_28));
   text_layer_set_text(s_details_layer, window_get_user_data(window));
   layer_add_child(window_layer, text_layer_get_layer(s_details_layer));
+  text_layer_enable_screen_text_flow_and_paging(s_details_layer, 5);
 }
 
 static void window_unload(Window *window){
@@ -101,27 +102,11 @@ static void menu_long_select_callback(MenuLayer *menu_layer, MenuIndex *cell_ind
   menu_layer_reload_data(menu_layer);
 }
 
-
-#ifdef PBL_ROUND 
-static int16_t get_cell_height_callback(MenuLayer *menu_layer, MenuIndex *cell_index, void *callback_context) { 
-  if (menu_layer_is_index_selected(menu_layer, cell_index)) {
-    switch (cell_index->row) {
-      case 0:
-        return MENU_CELL_ROUND_FOCUSED_SHORT_CELL_HEIGHT;
-        break;
-      default:
-        return MENU_CELL_ROUND_FOCUSED_TALL_CELL_HEIGHT;
-    }
-  } else {
-    return MENU_CELL_ROUND_UNFOCUSED_SHORT_CELL_HEIGHT;
-  }
-}
-#endif
-
 static void main_window_load(Window *window) {
   Layer *window_layer = window_get_root_layer(window);
   status_bar_load(window_layer);
   s_menu_layer = menu_layer_create(status_bar_bounds(window_layer));
+  menu_layer_set_center_focused(s_menu_layer, false);
   menu_layer_set_callbacks(s_menu_layer, NULL, (MenuLayerCallbacks){
     .get_num_sections = NULL,
     .get_num_rows = menu_get_num_rows_callback,
@@ -129,7 +114,7 @@ static void main_window_load(Window *window) {
     .draw_row = menu_draw_row_callback,
     .select_click = menu_select_callback,
     .select_long_click = menu_long_select_callback,
-    .get_cell_height = PBL_IF_ROUND_ELSE(get_cell_height_callback, NULL),
+    .get_cell_height = NULL,
   });
 
   menu_layer_set_highlight_colors(s_menu_layer, GColorSunsetOrange, GColorBlack);
@@ -158,6 +143,12 @@ static void init() {
       persist_read_string(DATA_STORE_KEY+i, &scripples.items[i-1].str[0], sizeof(data_t));
     }
   } 
+  // Add some fake data
+  scripples.num_items = 4;
+  snprintf(scripples.items[scripples.num_items - 1].str, ITEM_SIZE, "This is a test");
+  snprintf(scripples.items[scripples.num_items - 2].str, ITEM_SIZE, "This is a another test. It is going to be a long one.");
+  snprintf(scripples.items[scripples.num_items - 3].str, ITEM_SIZE, "This is a third test");
+  snprintf(scripples.items[scripples.num_items - 4].str, ITEM_SIZE, "This is a fourth test");
   
   s_details_window = window_create();
   window_set_window_handlers(s_details_window, (WindowHandlers) {
