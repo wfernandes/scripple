@@ -84,12 +84,7 @@ static void menu_select_callback(MenuLayer *menu_layer, MenuIndex *cell_index, v
     return;
   }
   
-  s_details_window = window_create();
   window_set_user_data(s_details_window, scripples.items[cell_index->row - 1].str);
-  window_set_window_handlers(s_details_window, (WindowHandlers) {
-    .load = window_load,
-    .unload = window_unload,
-  });
   window_stack_push(s_details_window, true);
 }
 
@@ -163,6 +158,12 @@ static void init() {
       persist_read_string(DATA_STORE_KEY+i, &scripples.items[i-1].str[0], sizeof(data_t));
     }
   } 
+  
+  s_details_window = window_create();
+  window_set_window_handlers(s_details_window, (WindowHandlers) {
+    .load = window_load,
+    .unload = window_unload,
+  });
   
   s_main_window = window_create();
   window_set_window_handlers(s_main_window, (WindowHandlers) {
